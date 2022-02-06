@@ -1,0 +1,40 @@
+<%- include('../partials/header'); -%>
+
+<form id="authForm">
+    <h2>Sign Up</h2>
+
+    <label for="first_name">First Name <span>*</span></label>
+    <input type="text" id="first_name" name="first_name" required>
+    <div class="first_name error"></div>
+
+    <label for="last_name">Last Name <span>*</span></label>
+    <input type="text" id="last_name" name="last_name" required>
+    <div class="last_name error"></div>
+
+    <label for="email">Email <span>*</span></label>
+    <input type="text" id="email" name="email" required>
+    <div class="email error"></div>
+
+    <label for="password">Password <span>*</span></label>
+    <input type="password" id="password" name="password" required>
+    <div class="password error"></div>
+
+    <button>Sign Up</button>
+</form>
+
+<script>
+    const form = document.querySelector("form")
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        const first_name = form.first_name.value
+        const last_name = form.last_name.value
+        const email = form.email.value
+        const password = form.password.value 
+
+        console.log(first_name, last_name, email, password)
+    })
+</script>
+
+<%- include('../partials/footer'); -%>
