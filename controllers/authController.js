@@ -50,8 +50,9 @@ login_post = async (req, res) => {
     }
 }
 
-logout = (req, res) => {
-    res.render("logout")
+logout_get = (req, res) => {
+    res.cookie('jwt', '', { maxAge: 1 })
+    res.redirect('/')
 }
 
 module.exports = {
@@ -59,5 +60,5 @@ module.exports = {
     signup_post,
     login_get,
     login_post,
-    logout
+    logout_get
 }

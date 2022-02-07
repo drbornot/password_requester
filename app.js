@@ -4,6 +4,7 @@ const dotenv = require("dotenv")
 const cookieParser = require("cookie-parser")
 const entriesRoutes = require("./routes/entriesRoute")
 const authRoutes = require("./routes/authRoute")
+const {requireAuth, checkUser} = require("./middleware/authMiddleware")
 
 dotenv.config()
 
@@ -29,8 +30,9 @@ mongoose.connect(dbUDRI)
     .catch((error) => console.log(error))
 
 // routes
+app.get('*', checkUser)
 app.get('/', (req, res) => res.render('index', { user: [] }))
-app.get('/search', (req, res) => res.render('search', { user: [] }))
+app.get('/search', requireAuth, (req, res) => res.render('search', { user: [] }))
 
 app.use(entriesRoutes)
 app.use(authRoutes)
