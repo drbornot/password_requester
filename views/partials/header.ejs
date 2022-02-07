@@ -19,9 +19,13 @@
     <nav>
         <h1><a href="/">Pass WareHouse</a></h1>
         <ul>
-            <li><a href="/search">Search</a></li>
-            <li><a href="/logout">Log out</a></li>
-            <li><a href="/login">Log in</a></li>
-            <li><a href="/signup">Sign up</a></li>
+            <% if (user) { %>
+                <li><a href="/search" class="search-link">Search</a></li>
+                <li><span>Welcome, <%= user.first_name %></span></li>
+                <li><a href="/logout">Log out</a></li>
+            <% } else { %>
+                <li><a href="/login">Log in</a></li>
+                <li><a href="/signup">Sign up</a></li>
+            <% } %>
         </ul>
     </nav>

@@ -56,6 +56,22 @@ nav li a {
     padding: 10px 16px;
 }
 
+nav li span {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    font-size: 1.2em;
+    display: block;
+    padding: 10px 16px;
+    color: #522139;
+}
+
+.search-link {
+    margin-right: 200px;
+    border: 2px solid #444;
+    border-radius: 25px;
+    background-color: #FEE996;
+}
+
 form#authForm h2, label, input, button, span {
     font-family: 'Quicksand', sans-serif;
     color: #444;
