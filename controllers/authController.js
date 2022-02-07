@@ -1,5 +1,18 @@
 const handleErrors = require("../helpers/handleErrors")
 const User = require("../models/users")
+const jwt = require("jsonwebtoken")
+const dotenv = require("dotenv")
+
+dotenv.config()
+
+const maxAge = 1 * 24 * 60 * 60
+
+const createToken = (id) => {
+    const key = process.env.JWTSECRETKEY
+    return jwt.sign({ id }, key, {
+        expiresIn: maxAge
+    })
+}
 
 signup_get = (req, res) => {
     res.render("auth/signup")
@@ -10,7 +23,9 @@ signup_post = async (req, res) => {
 
     try {
         const user = await User.create({ first_name, last_name, email, password })
-        res.status(201).json(user)
+        const token = createToken(user._id)
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: 'strict', secure: true })
+        res.status(201).json({ user: user._id })
     } catch(err) {
         const errors = handleErrors(err, 'signup')
         res.status(400).send({ errors })

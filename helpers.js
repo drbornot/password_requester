@@ -7,7 +7,7 @@ let emitPassword = () => {
 
         password = data.toString()
     })
-    console.log(password)
+    
     return password
 }
 
