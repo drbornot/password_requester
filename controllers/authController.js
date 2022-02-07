@@ -39,9 +39,15 @@ login_get = (req, res) => {
 login_post = async (req, res) => {
     const { email, password } = req.body
 
-
-
-    res.send(`Username: ${username}, Password: ${password}`)
+    try {
+        const user = await User.login(email, password)
+        const token = createToken(user._id)
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: 'strict', secure: true })
+        res.status(200).json({ user: user._id })
+    } catch (err) {
+        const errors = handleErrors(err, 'login')
+        res.status(400).json({ errors })
+    }
 }
 
 logout = (req, res) => {

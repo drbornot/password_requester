@@ -114,10 +114,11 @@ form#authForm button:hover {
 }
 
 form#authForm .error {
-    color: #ff0099;
+    color: #e91e4a;
     margin: 10px 2px;
+    font-family: 'Quicksand', sans-serif;
     font-size: 0.8em;
-    font-weight: bold;
+    /* font-weight: bold; */
 }
 
 .sideImg img {
