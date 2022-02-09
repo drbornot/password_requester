@@ -1,6 +1,25 @@
 
 const Entry = require("../models/entries")
 const cryptoController = require("../controllers/cryptoController")
+const jwt = require("jsonwebtoken")
+const User = require("../models/users")
+const dotenv = require("dotenv")
+
+dotenv.config()
+
+getAuthenticatedUser = (value) => {
+    const token = value
+    const key = process.env.JWTSECRETKEY
+
+    let user
+    if (token) {
+        user = jwt.verify(token, key)
+    } else {
+        throw Error("Any token was provide from JWT")
+    }
+
+    return user.id
+}
 
 getEntries = async (req, res) => {
     
@@ -12,7 +31,9 @@ getEntries = async (req, res) => {
 
 registerEntry = async (req, res) => {
 
-    const { acronym, website, username, owner } = req.body
+    const { acronym, username, website } = req.body
+    
+    const owner = getAuthenticatedUser(req.cookies.jwt)
     
     const password = await cryptoController.encrypt(req.body.password)
     

@@ -1,0 +1,250 @@
+<%- include('../partials/header'); -%>
+
+<div class="search-container">
+    <div class="forms-container">
+        <button class="btn">
+            <div>
+                <i class="fa fa-plus"></i>
+                <span class="wspan">Add</span>
+            </div>
+        </button>
+        <div class="add-form-container invisible">
+            <form>
+                <div class="add-form-items">
+                    <label for="acronym">Acronym</label>
+                    <input type="text" name="acronym" required>
+                    <div class="acronym error"></div>
+
+                    <label for="username">Username</label>
+                    <input type="text" name="username" required>
+                    <div class="username error"></div>
+
+                    <label for="password">Password</label>
+                    <input type="password" name="password" required>
+                    <div class="password error"></div>
+
+                    <label for="website">Website</label>
+                    <input type="text" name="website" required>
+                    <div class="website error"></div>
+
+                    <button class="btn">Add</button>
+                    <button class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="search-form-container">
+            <form>
+                <div class="search-input">
+                    <input type="text" id="searchInput" class="searchInput" placeholder="Enter acronym">
+                    <button class="btn">Search</button>
+                </div>
+                <div class="load-spinner load-spinner-none">
+                    <div class="la-pacman la-dark la-2x">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+                <div class="search-items">
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // forms containers
+    const addFormContainer = document.querySelector(".add-form-container")
+    const searchFormContainer = document.querySelector(".search-form-container")
+    
+    // forms
+    const formSearchEntry = document.querySelector(".search-form-container form")
+    const formAddEntry = document.querySelector(".add-form-container form")
+
+    const searchInput = document.querySelector(".searchInput")
+    const searchItems = document.querySelector(".search-items")
+    const clipboardButton = document.querySelector(".copy-clipboard-button")
+    const load_spinner = document.querySelector(".load-spinner")
+
+    // toggle button to swith add/search forms
+    const toggleButton = document.querySelector(".forms-container button")
+    const iconButtonToggle = document.querySelector(".forms-container button i")
+    const textButtonToggle = document.querySelector(".forms-container button span")
+    let toggleDefault = true
+
+    toggleButton.addEventListener("click", async (e) => {
+
+        if(toggleDefault) {
+            iconButtonToggle.classList.replace("fa-plus", "fa-search")
+            textButtonToggle.textContent = "Search"
+            searchFormContainer.classList.add("invisible")
+            addFormContainer.classList.remove("invisible")
+
+            toggleDefault = false
+        } else {
+            iconButtonToggle.classList.replace("fa-search", "fa-plus")
+            textButtonToggle.textContent = "Add"
+            searchFormContainer.classList.remove("invisible")
+            addFormContainer.classList.add("invisible")
+
+            toggleDefault = true
+        }
+
+
+    })
+
+    searchInput.value = ""
+
+    formSearchEntry.addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        const searchInner = document.querySelectorAll(".search-inner")
+        const searchNotFound = document.querySelector(".search-inner-not-found")
+        
+
+        if(searchInner.length) {
+            searchInner.forEach(element => {
+                element.remove()
+            })
+        }
+
+        if(searchNotFound) {
+            searchNotFound.remove()
+        }
+
+        let value = searchInput.value
+        load_spinner.classList.remove("load-spinner-none")
+
+        searchByAcronym(value).then((result, error) => {
+            if(error) {
+                console.log(error)
+            }
+
+            
+            
+            if(result.length) {
+                result.forEach(element => {
+                    createSearchedItem(element) 
+                })
+            } else {
+                searchItems.insertAdjacentHTML("beforeend", `
+                    <div class="search-inner-not-found">
+                        <span>No records was founded!</span>
+                    </div>
+                `)
+            }
+
+            load_spinner.classList.add("load-spinner-none")
+        })
+         
+    })
+
+    let createSearchedItem = (data) => {
+        searchItems.insertAdjacentHTML("beforeend", `
+            <div class="search-inner">
+                <ul>
+                    <li>
+                        <label for="acronym_${data._id}">Acronym:</label>
+                        <input type="text" id="acronym_${data._id}" value="${data.acronym}" readonly>
+                    </li>
+                    <li>
+                        <label for="username_${data._id}">Username:</label>
+                        <input type="text" id="username_${data._id}" value="${data.username}" readonly>
+                    </li>
+                    <li>
+                        <label for="password_${data._id}">Password:</label>
+                        
+                        <button class="copy-clipboard-button" type="button">
+                            <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
+                            <img src="/copy_clipboard.png" width="20">
+                        </button>
+                    </li>
+                    <li>
+                        <label for="website_${data._id}">Website:</label>
+                        <input type="text" id="website_${data._id}" value="${data.website}" readonly>
+                    </li>
+                </ul>
+            </div>
+        `)
+    }
+
+    let searchByAcronym = async (value) => {
+
+        let data = []
+
+        try {
+            if(value) {
+                const result = await fetch(`/entries/acronym/${value}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+
+                data = await result.json()
+            } else {
+                const result = await fetch(`/entries`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+
+                data = await result.json()
+            }
+            
+            return data.entries
+
+        } catch (error) {
+            console.log(`Emitted error: ${error}`)
+        }
+    }
+
+
+    // *******************************************************
+
+    formAddEntry.addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        let acronym = formAddEntry.acronym
+        let username = formAddEntry.username
+        let password = formAddEntry.password
+        let website = formAddEntry.website
+
+        addEntry(acronym.value, username.value, password.value, website.value)
+            .then((result, err) => {
+                if(err) {
+                    console.log(err)
+                }
+
+                if (result) {
+                    acronym.value = ""
+                    username.value = ""
+                    password.value = ""
+                    website.value = ""
+                }
+            })
+        
+
+    })
+
+    let addEntry = async (acronym, username, password, website) => {
+        console.log(acronym, username, password, website)
+        try {
+            const result = await fetch("/entries", {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json' },
+                body: JSON.stringify({ acronym, username, password, website })                
+            })
+
+            const data = await result.json()
+            return data.entry
+        } catch (error) {
+            console.log(`Emitted error: ${error}`)
+        }
+
+    }
+</script>
+
+<%- include('../partials/footer'); -%>

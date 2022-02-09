@@ -2,75 +2,99 @@
 @import url('https://fonts.googleapis.com/css2?family=Sedgwick+Ave&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,400&display=swap');
 
 
-body {
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Sedgwick Ave', cursive;
     background-color: antiquewhite;   
 }
 
-header {
-    display: flex;
-}
+/* ###################################### nav ########################################### */
 
-ul {
+nav ul {
     list-style-type: none;
-}
+} 
 
-a {
+nav ul li a {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #522139;
+    display: block;
+    text-align: center;
+    padding: 10px 25px;
     text-decoration: none;
 }
 
-nav {
+.logo {
+    text-transform: uppercase;
+    font-size: 40px;
+    font-style: italic;
+}
+
+@media screen and (min-width:576px) {
+    nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+    }
+
+    nav ul li {
+        flex: 1 0 auto;
+    }
+
+    .logo {
+        display: block;
+        text-align: center;
+    }
+
+    .logo .fa {
+        display: none;
+    }
+}
+
+/* ########################## end of nav ############################# */
+/* ##########################   banner   ############################# */
+
+#banner {
+    min-height: 90vh;
+    background: 
+    linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+    
+    url(../images/password.jpeg);
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    justify-content: center;
 }
 
-nav a {
-    font-family: 'Sedgwick Ave', cursive;
-    color: #522139;
+.banner-title h2, .banner-title h3 {
+    font-size: 50px;
+    text-transform: uppercase;
+    text-align: center;
+    color: #e0e2db;
+    font-style: italic;
 }
 
-nav h1 {
-    margin-left: 40px;
-}
-nav>h1>a {
-    font-size: 3rem;
+.banner-title h2 {
+    font-size: 6rem;
 }
 
-nav ul {
-    display: flex;
-    align-items: center;
-    margin-right: 20px;
+.banner-title h2 {
+    font-size: 4rem;
 }
 
-nav li{
-    margin-left: 20px;
-}
+/* ########################## end of banner ########################## */
 
-nav li a {
-    font-family: 'Quicksand', sans-serif;
-    font-weight: bold;
-    font-size: 1.2em;
-    display: block;
-    padding: 10px 16px;
-}
-
-nav li span {
-    font-family: 'Quicksand', sans-serif;
-    font-weight: bold;
-    font-size: 1.2em;
-    display: block;
-    padding: 10px 16px;
-    color: #522139;
-}
-
-.search-link {
-    margin-right: 200px;
-    border: 2px solid #444;
-    border-radius: 25px;
-    background-color: #FEE996;
-}
+/* ########################  forms auth containers  ##################### */
 
 form#authForm h2, label, input, button, span {
     font-family: 'Quicksand', sans-serif;
@@ -137,30 +161,9 @@ form#authForm .error {
     /* font-weight: bold; */
 }
 
-.sideImg img {
-    width: 700px;
-}
+/* ############################## end form auth containers ############################# */
 
-.presentation {
-    margin: 0 auto;
-    justify-content: center;
-    align-items: center;
-    padding: 10 50px;
-}
-
-.presentation h2, h3 {
-    font-family: 'Sedgwick Ave', cursive;
-    color: #522139;
-}
-
-.presentation h2 {
-    font-size: 6rem;
-}
-
-.presentation h3 {
-    font-size: 4rem;
-}
-
+/* ############################## utils ################################ */
 .load-spinner {
     position: relative;
     top: 40%;
@@ -173,11 +176,124 @@ form#authForm .error {
     display: none;
 }
 
-.search-form {
+.invisible {
+    display: none;
+}
+
+/* ############################### end of utils ######################### */
+/* ############################### search forms ######################### */
+
+.search-container {
+    max-width: 95vw;
     margin: 0 auto;
-    width: 500px;
-    height: 400px;
+    padding: 20px 40px;
+}
+
+.forms-container { 
+    margin: 0 auto;
+    width: 70%;
+}
+
+.forms-container > button {
+    height: fit-content;
+}
+
+.forms-container .search-form-container,
+.forms-container .add-form-container {
+    margin-top: 10px;
+}
+
+.search-form-container, .add-form-container {
+    width: 100%;
+}
+
+form{
+    margin: 0 auto;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: #f5eded;
+    width: 100%;
+}
+
+.add-form-items {
+    padding: 10px 30px 30px 30px;
+}
+
+.add-form-items input, .search-input input{
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 1em;
+    width: 100%;
+}
+
+label{
+    display: block;
+    margin: 20px 0 10px;
+}
+
+.add-form-items .btn {
+    margin-top: 20px;
+}
+
+.search-input {
+    padding: 30px;
+    display: flex;
+}
+
+.search-input label {
+    visibility: hidden;
+}
+
+@media screen and (max-width:579px) {
+    .forms-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 1em;
+        margin-right: 25%;
+    }
+
+    .forms-container {
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .forms-container > button {
+        margin: 0 auto;
+    }
+
+    .forms-container .search-form-container,
+    .forms-container .add-form-container {
+        margin: 0 auto;
+        margin-top: 10px;
+    }
+}
+
+@media screen and (min-width:1248px) {
+    .forms-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-column-gap: 1em;
+        margin-right: 25%;
+    }
+
+    .forms-container > button {
+        margin-left: auto;
+        margin-right: 10px;
+        height: fit-content;
+    }
+
+    .forms-container .search-form-container,
+    .forms-container .add-form-container {
+        margin-top: 0;
+    }
+}
+/* .search-form {
     padding: 40px;
+    height: 450px;
     border: 1px solid rgb(167, 167, 167);
     border-radius: 10px;
     overflow: scroll;
@@ -200,9 +316,9 @@ form#authForm .error {
     border: 1px solid #ddd;
     font-size: 1em;
     width: 100%;
-}
+} */
 
-.btn {
+.btn, .cancel {
     background-color: #0808df;
     color: #fff;
     font-size: 1.08rem;
@@ -214,11 +330,22 @@ form#authForm .error {
     margin-left: 5px;
 }
 
+.cancel {
+    background-color: #444;
+}
+
 .btn:hover {
     background-color: #2727ee;
 }
 
+.cancel:hover {
+    background-color: #575757;
+}
 
+.wspan {
+    color: #fff;
+    margin-left: 5px;
+}
 
 .search-inner {
     margin-top: 10px;

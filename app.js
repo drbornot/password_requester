@@ -32,7 +32,7 @@ mongoose.connect(dbUDRI)
 // routes
 app.get('*', checkUser)
 app.get('/', checkUser, (req, res) => res.render('index'))
-app.get('/search', requireAuth, (req, res) => res.render('search'))
+app.get('/search', requireAuth, (req, res) => res.render('search/search'))
 
 app.use(entriesRoutes)
 app.use(authRoutes)
