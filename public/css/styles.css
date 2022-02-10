@@ -94,6 +94,63 @@ nav ul li a {
 
 /* ########################## end of banner ########################## */
 
+/* ########################## messages container ##################### */
+
+.messages-container {
+    margin: 0 auto;
+    width: 50%;
+    margin-bottom: 20px;
+}
+
+.show-message {
+    /* border: 1px solid #b3b3b3; */
+    padding: 10px 20px;
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.show-message.success {
+    background-color: #0ead69;
+}
+
+.show-message.warning {
+    background-color: #fabc2a;
+}
+
+.show-message.error {
+    background-color: #e01e37;
+}
+
+.show-message span i {
+    font-size: 1.2em;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.show-message span {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.show-message button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.show-message button i {
+    font-size: 1.4em;
+    color: #fff;
+}
+
+/* ########################## end of messages container ##################### */
+
 /* ########################  forms auth containers  ##################### */
 
 form#authForm h2, label, input, button, span {

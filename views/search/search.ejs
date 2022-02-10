@@ -1,6 +1,13 @@
 <%- include('../partials/header'); -%>
 
 <div class="search-container">
+    <div class="messages-container">
+        <!-- <div class="show-message">
+            success fa-check-circle The Entry has been created successfully!
+            warning fa-exclamation-triangle Some warning alert before any request!
+            error fa-bug Something went wrong while you trying to create a new entry!
+        </div> -->
+    </div>
     <div class="forms-container">
         <button class="btn">
             <div>
@@ -16,11 +23,11 @@
                     <div class="acronym error"></div>
 
                     <label for="username">Username</label>
-                    <input type="text" name="username" required>
+                    <input type="text" name="username" required autocomplete="off">
                     <div class="username error"></div>
 
                     <label for="password">Password</label>
-                    <input type="password" name="password" required>
+                    <input type="password" name="password" required autocomplete="off">
                     <div class="password error"></div>
 
                     <label for="website">Website</label>
@@ -57,7 +64,15 @@
     </div>
 </div>
 
+<script src="./js/frontend/front.js"></script>
 <script>
+
+    // search-container
+    const searchContainer = document.querySelector(".search-container")
+    
+    // message container
+    const messagesContainer = document.querySelector(".messages-container") 
+
     // forms containers
     const addFormContainer = document.querySelector(".add-form-container")
     const searchFormContainer = document.querySelector(".search-form-container")
@@ -70,6 +85,7 @@
     const searchItems = document.querySelector(".search-items")
     const clipboardButton = document.querySelector(".copy-clipboard-button")
     const load_spinner = document.querySelector(".load-spinner")
+    const cancelAddFormButton = document.querySelector(".add-form-container .cancel")
 
     // toggle button to swith add/search forms
     const toggleButton = document.querySelector(".forms-container button")
@@ -91,11 +107,12 @@
             textButtonToggle.textContent = "Add"
             searchFormContainer.classList.remove("invisible")
             addFormContainer.classList.add("invisible")
+            cleanAddEntryForm()
 
             toggleDefault = true
         }
 
-
+        removeElementIfExistByQuerySelector(".show-message")
     })
 
     searchInput.value = ""
@@ -213,24 +230,26 @@
         let website = formAddEntry.website
 
         addEntry(acronym.value, username.value, password.value, website.value)
-            .then((result, err) => {
-                if(err) {
-                    console.log(err)
-                }
-
-                if (result) {
-                    acronym.value = ""
-                    username.value = ""
-                    password.value = ""
-                    website.value = ""
-                }
-            })
-        
-
+    
     })
 
+    cancelAddFormButton.addEventListener("click", () => {
+        cleanAddEntryForm()
+    })
+
+    messagesContainer.addEventListener("click", (e) => {
+        if (e.target && e.target.tagName === "I" && e.target.classList.contains("fa-times")) {
+            removeElementIfExistByQuerySelector(".show-message")
+        }
+    })
+
+    let printMessage = (message, flag) => {
+        const item = message_item(message, flag)
+        messagesContainer.insertAdjacentHTML("beforeend", item)
+    }
+
     let addEntry = async (acronym, username, password, website) => {
-        console.log(acronym, username, password, website)
+        
         try {
             const result = await fetch("/entries", {
                 method: 'POST',
@@ -239,11 +258,59 @@
             })
 
             const data = await result.json()
-            return data.entry
+
+            if (data.error) {
+                printMessage("Something went wrong while you trying to create a new entry!", "error")   
+            } else {
+                printMessage("The Entry has been created successfully!", "success")
+                cleanAddEntryForm()
+            }
         } catch (error) {
             console.log(`Emitted error: ${error}`)
         }
 
+    }
+
+    let message_item = function(message, flag) {
+        const { success_i_call, warning_i_class, error_i_class } = {success_i_call: "fa-check-circle", warning_i_class: "fa-exclamation-triangle", error_i_class: "fa-bug"} 
+        let message_type
+
+        switch (flag) {
+            case "success":
+                message_type = success_i_call
+                break;
+            case "warning":
+                message_type = warning_i_class
+                break
+            case "error":
+                message_type = error_i_class
+                break
+        }
+
+        const item = 
+        function (message, message_type) { 
+        
+        return `
+            <div class="show-message ${flag}">
+                <span><i class="fa ${message_type}"></i> ${message}</span>
+                <button><i class="fa fa-times"></i></button>
+            </div>
+        `
+        }(message, message_type)
+
+        return item
+    }
+    
+    function cleanAddEntryForm() {
+        let acronym = formAddEntry.acronym
+        let username = formAddEntry.username
+        let password = formAddEntry.password
+        let website = formAddEntry.website
+
+        acronym.value = ""
+        username.value = ""
+        password.value = ""
+        website.value = ""
     }
 </script>
 
