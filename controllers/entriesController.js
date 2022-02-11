@@ -76,7 +76,7 @@ entriesByAcronym = async (req, res) => {
 
     const acronym = req.params.acronym
 
-    await Entry.find({ acronym: { $regex: acronym } })
+    await Entry.find({ acronym: { $regex: new RegExp('^' + acronym, "i") } })
         .then(result => {
             res.status(200).json({ entries: result })
         })

@@ -19,23 +19,23 @@
             <form>
                 <div class="add-form-items">
                     <label for="acronym">Acronym</label>
-                    <input type="text" name="acronym" required>
+                    <input type="text" name="acronym" >
                     <div class="acronym error"></div>
 
                     <label for="username">Username</label>
-                    <input type="text" name="username" required autocomplete="off">
+                    <input type="text" name="username"  autocomplete="off">
                     <div class="username error"></div>
 
                     <label for="password">Password</label>
-                    <input type="password" name="password" required autocomplete="off">
+                    <input type="password" name="password" autocomplete="off">
                     <div class="password error"></div>
 
                     <label for="website">Website</label>
-                    <input type="text" name="website" required>
+                    <input type="text" name="website" >
                     <div class="website error"></div>
 
-                    <button class="btn">Add</button>
-                    <button class="cancel">Cancel</button>
+                    <button type="submit" class="btn">Add</button>
+                    <button type="button" class="cancel">Cancel</button>
                 </div>
             </form>
         </div>
@@ -47,7 +47,17 @@
                     <button class="btn">Search</button>
                 </div>
                 <div class="load-spinner load-spinner-none">
-                    <div class="la-pacman la-dark la-2x">
+                    <!-- <div class="la-pacman la-2x">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div> -->
+                    <div class="la-ball-spin-clockwise la-2x">
+                        <div></div>
+                        <div></div>
                         <div></div>
                         <div></div>
                         <div></div>
@@ -55,6 +65,7 @@
                         <div></div>
                         <div></div>
                     </div>
+
                 </div>
                 <div class="search-items">
                     
@@ -100,6 +111,8 @@
             textButtonToggle.textContent = "Search"
             searchFormContainer.classList.add("invisible")
             addFormContainer.classList.remove("invisible")
+            removeSearchedItems(searchItems)
+            searchInput.value = ""
 
             toggleDefault = false
         } else {
@@ -115,7 +128,12 @@
         removeElementIfExistByQuerySelector(".show-message")
     })
 
-    searchInput.value = ""
+    let printMessage = (message, flag) => {
+        const item = message_item(message, flag)
+        messagesContainer.insertAdjacentHTML("beforeend", item)
+    }
+
+    // ****************** form search *******************
 
     formSearchEntry.addEventListener("submit", (e) => {
         e.preventDefault()
@@ -123,7 +141,6 @@
         const searchInner = document.querySelectorAll(".search-inner")
         const searchNotFound = document.querySelector(".search-inner-not-found")
         
-
         if(searchInner.length) {
             searchInner.forEach(element => {
                 element.remove()
@@ -135,6 +152,7 @@
         }
 
         let value = searchInput.value
+
         load_spinner.classList.remove("load-spinner-none")
 
         searchByAcronym(value).then((result, error) => {
@@ -142,8 +160,6 @@
                 console.log(error)
             }
 
-            
-            
             if(result.length) {
                 result.forEach(element => {
                     createSearchedItem(element) 
@@ -151,7 +167,7 @@
             } else {
                 searchItems.insertAdjacentHTML("beforeend", `
                     <div class="search-inner-not-found">
-                        <span>No records was founded!</span>
+                        <span>No records was found!</span>
                     </div>
                 `)
             }
@@ -218,8 +234,7 @@
         }
     }
 
-
-    // *******************************************************
+    // ******************* form add *********************
 
     formAddEntry.addEventListener("submit", (e) => {
         e.preventDefault()
@@ -229,8 +244,14 @@
         let password = formAddEntry.password
         let website = formAddEntry.website
 
-        addEntry(acronym.value, username.value, password.value, website.value)
-    
+        let emptyValues = checkIfEmptiesValues(acronym.value, username.value, password.value)
+
+        if (emptyValues.length) {
+            let print = emptyValues.length > 1 ? emptyValues.join(", ") + " values" : emptyValues[0] + " value"
+            printMessage(`Provide ${print} to proceed`, "warning")
+        } else {
+            addEntry(acronym.value, username.value, password.value, website.value)
+        }
     })
 
     cancelAddFormButton.addEventListener("click", () => {
@@ -242,11 +263,6 @@
             removeElementIfExistByQuerySelector(".show-message")
         }
     })
-
-    let printMessage = (message, flag) => {
-        const item = message_item(message, flag)
-        messagesContainer.insertAdjacentHTML("beforeend", item)
-    }
 
     let addEntry = async (acronym, username, password, website) => {
         
@@ -270,36 +286,6 @@
         }
 
     }
-
-    let message_item = function(message, flag) {
-        const { success_i_call, warning_i_class, error_i_class } = {success_i_call: "fa-check-circle", warning_i_class: "fa-exclamation-triangle", error_i_class: "fa-bug"} 
-        let message_type
-
-        switch (flag) {
-            case "success":
-                message_type = success_i_call
-                break;
-            case "warning":
-                message_type = warning_i_class
-                break
-            case "error":
-                message_type = error_i_class
-                break
-        }
-
-        const item = 
-        function (message, message_type) { 
-        
-        return `
-            <div class="show-message ${flag}">
-                <span><i class="fa ${message_type}"></i> ${message}</span>
-                <button><i class="fa fa-times"></i></button>
-            </div>
-        `
-        }(message, message_type)
-
-        return item
-    }
     
     function cleanAddEntryForm() {
         let acronym = formAddEntry.acronym
@@ -312,6 +298,7 @@
         password.value = ""
         website.value = ""
     }
+
 </script>
 
 <%- include('../partials/footer'); -%>
