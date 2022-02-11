@@ -44,7 +44,7 @@
             <form>
                 <div class="search-input">
                     <input type="text" id="searchInput" class="searchInput" placeholder="Enter acronym">
-                    <button class="btn">Search</button>
+                    <button type="submit" class="btn">Search</button>
                 </div>
                 <div class="load-spinner load-spinner-none">
                     <!-- <div class="la-pacman la-2x">
@@ -93,9 +93,13 @@
     const formAddEntry = document.querySelector(".add-form-container form")
 
     const searchInput = document.querySelector(".searchInput")
+    const searchInputButton = document.querySelector(".search-input > button")
+
     const searchItems = document.querySelector(".search-items")
     const clipboardButton = document.querySelector(".copy-clipboard-button")
     const load_spinner = document.querySelector(".load-spinner")
+
+    const addFormButton = document.querySelector(".add-form-items > button.btn")
     const cancelAddFormButton = document.querySelector(".add-form-container .cancel")
 
     // toggle button to swith add/search forms
@@ -112,7 +116,7 @@
             searchFormContainer.classList.add("invisible")
             addFormContainer.classList.remove("invisible")
             removeSearchedItems(searchItems)
-            searchInput.value = ""
+            cleanFormInputs()
 
             toggleDefault = false
         } else {
@@ -120,7 +124,7 @@
             textButtonToggle.textContent = "Add"
             searchFormContainer.classList.remove("invisible")
             addFormContainer.classList.add("invisible")
-            cleanAddEntryForm()
+            cleanFormInputs()
 
             toggleDefault = true
         }
@@ -135,7 +139,7 @@
 
     // ****************** form search *******************
 
-    formSearchEntry.addEventListener("submit", (e) => {
+    formSearchEntry.addEventListener("submit", async (e) => {
         e.preventDefault()
 
         const searchInner = document.querySelectorAll(".search-inner")
@@ -153,9 +157,10 @@
 
         let value = searchInput.value
 
+        searchInputButton.setAttribute("disabled", "disabled")
         load_spinner.classList.remove("load-spinner-none")
 
-        searchByAcronym(value).then((result, error) => {
+        await searchByAcronym(value).then((result, error) => {
             if(error) {
                 console.log(error)
             }
@@ -163,6 +168,10 @@
             if(result.length) {
                 result.forEach(element => {
                     createSearchedItem(element) 
+                    var allSpan = document.querySelectorAll('.search-inner div span')
+                    if(allSpan.length) {
+                        collapsibleItemsHandler(allSpan)
+                    }
                 })
             } else {
                 searchItems.insertAdjacentHTML("beforeend", `
@@ -171,37 +180,39 @@
                     </div>
                 `)
             }
-
-            load_spinner.classList.add("load-spinner-none")
         })
-         
+
+        load_spinner.classList.add("load-spinner-none")
+        searchInputButton.removeAttribute('disabled')         
     })
 
     let createSearchedItem = (data) => {
         searchItems.insertAdjacentHTML("beforeend", `
             <div class="search-inner">
-                <ul>
-                    <li>
-                        <label for="acronym_${data._id}">Acronym:</label>
-                        <input type="text" id="acronym_${data._id}" value="${data.acronym}" readonly>
-                    </li>
-                    <li>
-                        <label for="username_${data._id}">Username:</label>
-                        <input type="text" id="username_${data._id}" value="${data.username}" readonly>
-                    </li>
-                    <li>
-                        <label for="password_${data._id}">Password:</label>
-                        
-                        <button class="copy-clipboard-button" type="button">
-                            <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
-                            <img src="/copy_clipboard.png" width="20">
-                        </button>
-                    </li>
-                    <li>
-                        <label for="website_${data._id}">Website:</label>
-                        <input type="text" id="website_${data._id}" value="${data.website}" readonly>
-                    </li>
-                </ul>
+                <li>
+                    <div>
+                        <span>Acronym: ${data.acronym}</span>
+                        <i class="fa fa-angle-down"></i>
+                    </div>
+                    <ul>
+                        <li>
+                            <label for="username_${data._id}">Username:</label>
+                            <input type="text" id="username_${data._id}" value="${data.username}" readonly>
+                        </li>
+                        <li>
+                            <label for="password_${data._id}">Password:</label>
+                            
+                            <button class="copy-clipboard-button" type="button">
+                                <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
+                                <img src="/copy_clipboard.png" width="20">
+                            </button>
+                        </li>
+                        <li>
+                            <label for="website_${data._id}">Website:</label>
+                            <input type="text" id="website_${data._id}" value="${data.website}" readonly>
+                        </li>
+                    </ul>
+                </li>
             </div>
         `)
     }
@@ -234,9 +245,30 @@
         }
     }
 
+    let collapsibleItemsHandler = (allSpan) => {
+        allSpan.forEach(function (item) {
+            item.onclick = function () {
+                const childList = this.closest("div").parentNode.getElementsByTagName("li")
+                const icon = this.parentNode.querySelector("i.fa")
+                
+                for (let li of childList) {
+                    var currentState = li.style.display;
+                    if (currentState == "none") {
+                        icon.classList.replace("fa-angle-up", "fa-angle-down")
+                        li.style.display = "block";
+                    }
+                    else {
+                        icon.classList.replace("fa-angle-down", "fa-angle-up")
+                        li.style.display = "none";
+                    }
+                }                
+            }
+        })
+    }
+
     // ******************* form add *********************
 
-    formAddEntry.addEventListener("submit", (e) => {
+    formAddEntry.addEventListener("submit", async (e) => {
         e.preventDefault()
 
         let acronym = formAddEntry.acronym
@@ -246,16 +278,19 @@
 
         let emptyValues = checkIfEmptiesValues(acronym.value, username.value, password.value)
 
+        addFormButton.setAttribute("disabled", "disabled")
+
         if (emptyValues.length) {
             let print = emptyValues.length > 1 ? emptyValues.join(", ") + " values" : emptyValues[0] + " value"
             printMessage(`Provide ${print} to proceed`, "warning")
         } else {
-            addEntry(acronym.value, username.value, password.value, website.value)
+            await addEntry(acronym.value, username.value, password.value, website.value)
+            addFormButton.removeAttribute("disabled")
         }
     })
 
     cancelAddFormButton.addEventListener("click", () => {
-        cleanAddEntryForm()
+        cleanFormInputs()
     })
 
     messagesContainer.addEventListener("click", (e) => {
@@ -279,7 +314,7 @@
                 printMessage("Something went wrong while you trying to create a new entry!", "error")   
             } else {
                 printMessage("The Entry has been created successfully!", "success")
-                cleanAddEntryForm()
+                cleanFormInputs()
             }
         } catch (error) {
             console.log(`Emitted error: ${error}`)
@@ -287,7 +322,7 @@
 
     }
     
-    function cleanAddEntryForm() {
+    let cleanFormInputs = function() {
         let acronym = formAddEntry.acronym
         let username = formAddEntry.username
         let password = formAddEntry.password
@@ -297,7 +332,10 @@
         username.value = ""
         password.value = ""
         website.value = ""
+        searchInput.value = ""
     }
+
+    cleanFormInputs()
 
 </script>
 

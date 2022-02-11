@@ -241,6 +241,12 @@ form#authForm .error {
     display: none;
 }
 
+button:disabled, button:disabled:hover {
+    background-color: #bbbbbb;
+    color: #dddddd;
+    cursor: default;
+}
+
 /* ############################### end of utils ######################### */
 /* ############################### search forms ######################### */
 
@@ -400,6 +406,20 @@ label{
     list-style-type: none;
 }
 
+.search-inner > li {
+    list-style-type: none;
+}
+
+.search-inner > li div {
+    padding: 10px 20px;
+    box-sizing: border-box;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    background-color: #b7dcdd;
+}
+
 .search-inner li {
     animation-duration: 1s;
     animation-name: slide-search-inner;
@@ -423,7 +443,7 @@ label{
     transition: 2s;
 }
 
-.search-inner li label {
+.search-inner > li div span, .search-inner li label {
     font-family: 'Quicksand', sans-serif;
     font-weight: 600;
     font-size: 1rem;
