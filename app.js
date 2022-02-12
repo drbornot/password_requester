@@ -37,5 +37,9 @@ app.get('/search', requireAuth, (req, res) => res.render('search/search'))
 app.use(entriesRoutes)
 app.use(authRoutes)
 
+app.use(function(req, res){
+    res.status(404).json('Page Not Found');
+});
+
 
 

@@ -13,5 +13,7 @@ router.delete('/entries/:id', entriesController.deleteEntry)
 
 router.get('/entries/acronym/:acronym', entriesController.entriesByAcronym)
 
+router.get('/entries/pwd/:id', entriesController.protectedPassword)
+
 module.exports = router
 

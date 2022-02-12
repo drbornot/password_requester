@@ -75,6 +75,16 @@
     </div>
 </div>
 
+<div class="modal">
+    <div class="modalContent">
+        <p>Are you sure you want delete this entry?</p>
+        <div>
+            <button type="button" class="cancelDeleteEntry" onclick="hideModal()">Cancel</button>
+            <button type="button" class="deleteEntry">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script src="./js/frontend/front.js"></script>
 <script>
 
@@ -96,7 +106,8 @@
     const searchInputButton = document.querySelector(".search-input > button")
 
     const searchItems = document.querySelector(".search-items")
-    const clipboardButton = document.querySelector(".copy-clipboard-button")
+    const searchInnerDeleteButton = document.querySelector(".inner-delete-button")
+
     const load_spinner = document.querySelector(".load-spinner")
 
     const addFormButton = document.querySelector(".add-form-items > button.btn")
@@ -108,6 +119,12 @@
     const textButtonToggle = document.querySelector(".forms-container button span")
     let toggleDefault = true
 
+    // modal container
+    const modal = document.querySelector(".modal")
+    const deleteEntryButton = document.querySelector(".deleteEntry")
+    let entryItem
+
+    //  **************  toggler button *********************************
     toggleButton.addEventListener("click", async (e) => {
 
         if(toggleDefault) {
@@ -132,9 +149,44 @@
         removeElementIfExistByQuerySelector(".show-message")
     })
 
-    let printMessage = (message, flag) => {
-        const item = message_item(message, flag)
-        messagesContainer.insertAdjacentHTML("beforeend", item)
+    // ***************** modal handler ************************
+
+    function hideModal() {
+      modal.style.display = "none"
+      entryItem = undefined
+    }
+
+    deleteEntryButton.addEventListener("click", async (e) => {
+        deleteEntryButton.setAttribute("disabled", "disabled")
+        await deleteEntry(entryItem)
+            .then((entry) => {
+                const elem = entryItem.closest(".search-inner")
+                elem.remove()
+            })
+        deleteEntryButton.removeAttribute("disabled")
+        hideModal()
+        printMessage("Entry deleted successfully!", "success")
+    })
+
+    async function deleteEntry(elem) {
+        let id = elem.dataset.identifier
+        
+        if(id) {
+            try {
+                const result = await fetch(`/entries/${id}`, {
+                    method: "DELETE",
+                    headers: {"Content-Type": "application/json"}
+                })
+
+                const data = await result.json()
+
+                if (data.entry) {
+                    return data.entry
+                }
+            } catch(err) {
+                console.log(err)
+            }
+        }
     }
 
     // ****************** form search *******************
@@ -168,11 +220,17 @@
             if(result.length) {
                 result.forEach(element => {
                     createSearchedItem(element) 
-                    var allSpan = document.querySelectorAll('.search-inner div span')
-                    if(allSpan.length) {
-                        collapsibleItemsHandler(allSpan)
-                    }
                 })
+
+                let collapsible = document.querySelectorAll('.search-inner li div i:not(.fa-trash-o), .search-inner li div span')
+                let collapsibleDeleteButton = document.querySelectorAll('.search-inner li div i.fa-trash-o')
+                let clipboardButtons = document.querySelectorAll(".copy-clipboard-button")
+        
+                if(collapsible.length) {
+                    collapsibleItemsHandler(collapsible)
+                    openDeleteModal(collapsibleDeleteButton)
+                    copyClipboard(clipboardButtons)
+                }
             } else {
                 searchItems.insertAdjacentHTML("beforeend", `
                     <div class="search-inner-not-found">
@@ -191,23 +249,31 @@
             <div class="search-inner">
                 <li>
                     <div>
+                        <i class="fa fa-angle-up"></i>
                         <span>Acronym: ${data.acronym}</span>
-                        <i class="fa fa-angle-down"></i>
+                        <button data-identifier="${data._id}" type="button" class="inner-delete-button">
+                            <i class="fa fa-trash-o"></i>
+                        </button>
                     </div>
                     <ul>
-                        <li>
+                        <li style="display: none;">
                             <label for="username_${data._id}">Username:</label>
-                            <input type="text" id="username_${data._id}" value="${data.username}" readonly>
-                        </li>
-                        <li>
-                            <label for="password_${data._id}">Password:</label>
+                            <button class="copy-clipboard-button" type="button">
+                                <input type="text" id="username_${data._id}" value="${data.username}" readonly>
+                                <i class="fa fa-copy"></i>
+                                <p></p>
+                            </button>
                             
+                        </li>
+                        <li style="display: none;">
+                            <label for="password_${data._id}">Password:</label>
                             <button class="copy-clipboard-button" type="button">
                                 <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
-                                <img src="/copy_clipboard.png" width="20">
+                                <i class="fa fa-copy"></i>
+                                <p></p>
                             </button>
                         </li>
-                        <li>
+                        <li style="display: none;">
                             <label for="website_${data._id}">Website:</label>
                             <input type="text" id="website_${data._id}" value="${data.website}" readonly>
                         </li>
@@ -245,24 +311,94 @@
         }
     }
 
-    let collapsibleItemsHandler = (allSpan) => {
-        allSpan.forEach(function (item) {
+    let collapsibleItemsHandler = (collapsible) => {
+        collapsible.forEach(function (item) {
+            
             item.onclick = function () {
-                const childList = this.closest("div").parentNode.getElementsByTagName("li")
-                const icon = this.parentNode.querySelector("i.fa")
                 
+                if (collapsible.length > 1) {
+                    collapsible.forEach((collItem) => {
+                        if(! collItem.parentNode.isSameNode(this.parentNode)) {
+                            const childList = collItem.closest("li").getElementsByTagName("li")
+                            const icon = collItem.parentNode.querySelector("i:not(.fa-trash-o)")
+                            for (let li of childList) {
+                                if (li.style.display == "block") {
+                                    icon.classList.replace("fa-angle-down", "fa-angle-up")
+                                    
+                                    li.style.display = "none"
+                                }
+                            }
+                        }
+                    })
+                }
+                
+                const childList = this.closest("li").getElementsByTagName("li")
+                const icon = this.parentNode.querySelector("i:not(.fa-trash-o)")
                 for (let li of childList) {
-                    var currentState = li.style.display;
+                    var currentState = li.style.display
+
                     if (currentState == "none") {
                         icon.classList.replace("fa-angle-up", "fa-angle-down")
-                        li.style.display = "block";
+                        li.classList.remove("opacityOut")
+                        li.classList.add("opacityIn")
+                        li.style.display = "block"
                     }
                     else {
                         icon.classList.replace("fa-angle-down", "fa-angle-up")
-                        li.style.display = "none";
+                        li.classList.remove("opacityIn")
+                        li.classList.add("opacityOut")
+                        li.style.display = "none"
                     }
                 }                
             }
+        })
+    }
+
+    let openDeleteModal = (collapsibleDelButtons) => {
+        collapsibleDelButtons.forEach((item) => {
+
+            item.onclick = function () {
+                modal.style.display = "block"
+                entryItem = this.parentNode
+            }
+        })
+    }
+    
+    let copyClipboard = function (clipboards) {
+        
+        clipboards.forEach((item) => {
+
+            item.onclick = async function () {
+                let input = this.firstElementChild
+                let attr = input.getAttribute("id")
+                let joined = attr.split("_")
+                const id = joined[1]
+
+                if (input.getAttribute("type") == "text") {
+                    await copyRichText(input.value)
+                } else if (input.getAttribute("type") == "password") {
+                    const result = await fetchPwd(id)
+                    const data = await result.json()
+                    await copyRichText(data.password)
+                }
+
+                let p = this.querySelector("p")
+                p.innerHTML = "Copied!"
+                p.style.display = "block"
+
+                setTimeout(() => {
+                    p.innerHTML = ""
+                    p.style.display = "none"
+                }, 1000)
+            }
+
+        })
+    }
+
+    async function fetchPwd(id) {
+        return await fetch(`/entries/pwd/${id}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"},
         })
     }
 
@@ -278,24 +414,13 @@
 
         let emptyValues = checkIfEmptiesValues(acronym.value, username.value, password.value)
 
-        addFormButton.setAttribute("disabled", "disabled")
-
         if (emptyValues.length) {
             let print = emptyValues.length > 1 ? emptyValues.join(", ") + " values" : emptyValues[0] + " value"
             printMessage(`Provide ${print} to proceed`, "warning")
         } else {
+            addFormButton.setAttribute("disabled", "disabled")
             await addEntry(acronym.value, username.value, password.value, website.value)
             addFormButton.removeAttribute("disabled")
-        }
-    })
-
-    cancelAddFormButton.addEventListener("click", () => {
-        cleanFormInputs()
-    })
-
-    messagesContainer.addEventListener("click", (e) => {
-        if (e.target && e.target.tagName === "I" && e.target.classList.contains("fa-times")) {
-            removeElementIfExistByQuerySelector(".show-message")
         }
     })
 
@@ -322,6 +447,18 @@
 
     }
     
+    // ******************* utils ************************
+    
+    cancelAddFormButton.addEventListener("click", () => {
+        cleanFormInputs()
+    })
+
+    messagesContainer.addEventListener("click", (e) => {
+        if (e.target && e.target.tagName === "I" && e.target.classList.contains("fa-times")) {
+            removeElementIfExistByQuerySelector(".show-message")
+        }
+    })
+
     let cleanFormInputs = function() {
         let acronym = formAddEntry.acronym
         let username = formAddEntry.username
@@ -335,8 +472,22 @@
         searchInput.value = ""
     }
 
-    cleanFormInputs()
+    let printMessage = (message, flag) => {
+        const item = message_item(message, flag)
+        messagesContainer.insertAdjacentHTML("beforeend", item)
+    }
+    
+    // ******************** load and ready ******************
 
+    window.onload = () => {
+        cleanFormInputs()
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            hideModal()
+        }
+    }
 </script>
 
 <%- include('../partials/footer'); -%>

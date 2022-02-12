@@ -22,9 +22,11 @@ getAuthenticatedUser = (value) => {
 }
 
 getEntries = async (req, res) => {
+
+    const owner = getAuthenticatedUser(req.cookies.jwt)
     
     // const filter = req.body
-    const entries = await Entry.find()
+    const entries = await Entry.find({'owner': owner})
 
     res.status(200).json({ entries })
 }
@@ -49,7 +51,10 @@ registerEntry = async (req, res) => {
 getEntry = async (req, res) => {
 
     const id = req.params.id
-    const entry = await Entry.findById(id)
+
+    const owner = getAuthenticatedUser(req.cookies.jwt)
+
+    const entry = await Entry.findById({ _id: id, owner: owner })
         .then(async (entry) => {
             const encryptedData = entry.password
             
@@ -65,9 +70,12 @@ getEntry = async (req, res) => {
 deleteEntry = async (req, res) => {
 
     const id = req.params.id
-    await Entry.findByIdAndDelete(id)
+
+    const owner = getAuthenticatedUser(req.cookies.jwt)
+
+    await Entry.findByIdAndDelete({ _id: id, owner: owner })
         .then(result => {
-            res.status(201).json({ redirect: '/entries' })
+            res.status(201).json({ entry: result._id })
         })
         .catch((error) => res.status(400).json({ error: error }))
 }
@@ -76,7 +84,9 @@ entriesByAcronym = async (req, res) => {
 
     const acronym = req.params.acronym
 
-    await Entry.find({ acronym: { $regex: new RegExp('^' + acronym, "i") } })
+    const owner = getAuthenticatedUser(req.cookies.jwt)
+
+    await Entry.find({ acronym: { $regex: new RegExp('^' + acronym, "i") }, owner: owner})
         .then(result => {
             res.status(200).json({ entries: result })
         })
@@ -85,10 +95,28 @@ entriesByAcronym = async (req, res) => {
         })
 }
 
+protectedPassword = async (req, res) => {
+
+    const id = req.params.id
+
+    const owner = getAuthenticatedUser(req.cookies.jwt)
+
+    await Entry.findById({ _id: id, owner: owner })
+        .then(async (entry) => {
+            const password = await cryptoController.decrypt(entry.password)
+            res.status(200).json({password})
+        })
+        .catch(err => {
+            console.log(err)
+            res.status("400").json({ err })
+        })
+}
+
 module.exports = {
     getEntries,
     registerEntry,
     getEntry,
     deleteEntry,
-    entriesByAcronym
+    entriesByAcronym,
+    protectedPassword
 }

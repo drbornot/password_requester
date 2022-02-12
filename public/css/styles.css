@@ -8,6 +8,10 @@
     box-sizing: border-box;
 }
 
+html {
+    height: auto;
+}
+
 body {
     font-family: 'Sedgwick Ave', cursive;
     background-color: antiquewhite;   
@@ -98,7 +102,7 @@ nav ul li a {
 
 .messages-container {
     margin: 0 auto;
-    width: 50%;
+    width: 70%;
     margin-bottom: 20px;
 }
 
@@ -109,7 +113,7 @@ nav ul li a {
     border-radius: 5px;
     box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
 }
@@ -147,6 +151,29 @@ nav ul li a {
 .show-message button i {
     font-size: 1.4em;
     color: #fff;
+}
+
+@media screen and (max-width:579px) {
+    .messages-container {
+        width: 100%;
+    }
+
+    .show-message span i {
+        font-size: 0.8em;
+        /* color: #fff;
+        margin-right: 10px; */
+    }
+    
+    .show-message span {
+        font-size: 0.9em;
+        /* font-weight: bold;
+        color: #fff; */
+    }
+    
+    .show-message button i {
+        font-size: 1em;
+        color: #fff;
+    }
 }
 
 /* ########################## end of messages container ##################### */
@@ -252,7 +279,7 @@ button:disabled, button:disabled:hover {
 
 .search-container {
     max-width: 95vw;
-    margin: 0 auto;
+    margin: 0 auto; 
     padding: 20px 40px;
 }
 
@@ -268,9 +295,6 @@ button:disabled, button:disabled:hover {
 .forms-container .search-form-container,
 .forms-container .add-form-container {
     margin-top: 10px;
-}
-
-.search-form-container, .add-form-container {
     width: 100%;
 }
 
@@ -402,27 +426,75 @@ label{
     margin-bottom: 15px;
 }
 
-.search-inner ul {
-    list-style-type: none;
-}
-
 .search-inner > li {
     list-style-type: none;
 }
 
 .search-inner > li div {
+    position: relative;
     padding: 10px 20px;
     box-sizing: border-box;
     box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
     border-radius: 5px;
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    align-items: center;
     background-color: #b7dcdd;
 }
 
-.search-inner li {
+.search-inner > li div {
     animation-duration: 1s;
     animation-name: slide-search-inner;
+}
+
+.search-inner > li div i:not(.fa-trash-o), .search-inner > li div span {
+    cursor: pointer;
+}
+
+.search-inner > li div span, .search-inner li label {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-left: 15px;
+}
+
+.search-inner > li div button {
+    position: absolute;
+    right: 20px;
+    font-size: 1.4em;
+    border: none;
+    background: none;
+}
+
+.search-inner > li div button:hover {
+    color: #e01e37;
+    cursor: pointer;
+}
+
+.opacityIn {
+    animation-name: easeIn;
+    animation-duration: 0.2s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+}
+
+@keyframes easeIn{
+    0% { opacity: 0; }
+    50% { opacity: 0.5; }
+    100% {opacity: 1;}
+}
+
+.opacityOut {
+    animation-name: easeOut;
+    animation-duration: 0.2s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+}
+
+@keyframes easeOut{
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% {opacity: 0;}
 }
 
 @keyframes slide-search-inner {
@@ -437,19 +509,17 @@ label{
       }
 }
 
-.search-inner li {
+.search-inner ul {
+    list-style-type: none;
+}
+
+.search-inner ul li {
     margin-bottom: 10px;
     width: 100%;
-    transition: 2s;
+    /* transition: 2s; */
 }
 
-.search-inner > li div span, .search-inner li label {
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.search-inner li input {
+.search-inner ul li input {
     border-style: none;
     padding: 10px 0;
     text-align: center;
@@ -457,7 +527,8 @@ label{
     width: 100%;
 }
 
-.search-inner li button {
+.search-inner ul li button {
+    position: relative;
     border-style: none;
     display: flex;
     justify-content: center;
@@ -466,12 +537,23 @@ label{
     cursor: pointer;
 }
 
-.search-inner li button img {
-    padding: 0 10px;
+.search-inner ul li button i {
+    padding: 0 20px;
+    font-size: 1.4em;
 }
 
-.search-inner ul {
-    padding: 0;
+.search-inner ul li button p {
+    display: none;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 5px 7px;
+    background-color: #3d3d3d;
+    color: #fff;
+    position: absolute;
+    top: -25px;
+    right: -20px;
+    border: 1px solid #575757;
+    border-radius: 5px;
 }
 
 .search-inner-not-found {
@@ -484,11 +566,80 @@ label{
     color: #665666;
 }
 
+/* ****************** modal **************************** */
+
+.modal {
+    font-family: 'Quicksand', sans-serif;
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.modalContent {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    background-color: #ececec;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 18px;
+    width: 50%;
+}
+
+.modalContent p {
+    margin-bottom: 40px;
+
+}
+
+.modalContent div {
+    display: flex;
+    justify-content: end;
+    margin-right: 25px;
+}
+
+.modalContent button {
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 20px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.deleteEntry {
+    background-color: rgb(255, 65, 65);
+}
+
+.cancelDeleteEntry {
+    background-color: #3d3d3d;
+    color: #fff;
+}
+
+.deleteEntry:hover {
+    background-color: rgb(255, 7, 7);
+    color: #fff;
+}
+
+.cancelDeleteEntry:hover {
+    background-color: rgb(167, 167, 167);
+    color: #3d3d3d;
+}
+
+/* *************************  footer  ********************************* */
+
 footer{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:60px;
     text-align: center;
     color: silver;
+    height:60px;
+    clear:both;
+    position:fixed;
+    bottom: 0;
+    width: 100%;
 }
