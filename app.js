@@ -38,7 +38,7 @@ app.use(entriesRoutes)
 app.use(authRoutes)
 
 app.use(function(req, res){
-    res.status(404).json('Page Not Found');
+    res.status(404).render('404');
 });
 
 

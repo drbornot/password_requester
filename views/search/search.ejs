@@ -222,8 +222,8 @@
                     createSearchedItem(element) 
                 })
 
-                let collapsible = document.querySelectorAll('.search-inner li div i:not(.fa-trash-o), .search-inner li div span')
-                let collapsibleDeleteButton = document.querySelectorAll('.search-inner li div i.fa-trash-o')
+                let collapsible = document.querySelectorAll('.search-inner-header > i, .search-inner-header span')
+                let collapsibleDeleteButton = document.querySelectorAll('.search-inner-header button')
                 let clipboardButtons = document.querySelectorAll(".copy-clipboard-button")
         
                 if(collapsible.length) {
@@ -247,38 +247,36 @@
     let createSearchedItem = (data) => {
         searchItems.insertAdjacentHTML("beforeend", `
             <div class="search-inner">
-                <li>
-                    <div>
-                        <i class="fa fa-angle-up"></i>
-                        <span>Acronym: ${data.acronym}</span>
-                        <button data-identifier="${data._id}" type="button" class="inner-delete-button">
-                            <i class="fa fa-trash-o"></i>
+                <div class="search-inner-header">
+                    <i class="fa fa-angle-up"></i>
+                    <span>Acronym: ${data.acronym}</span>
+                    <button data-identifier="${data._id}" type="button" class="inner-delete-button">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </div>
+                <div class="search-inner-list-item">
+                    <li>
+                        <label for="username_${data._id}">Username: </label>
+                        <input type="text" id="username_${data._id}" value="${data.username}" readonly>
+                        <button class="copy-clipboard-button" type="button">
+                            <i class="fa fa-copy"></i>
+                            <p></p>
                         </button>
-                    </div>
-                    <ul>
-                        <li style="display: none;">
-                            <label for="username_${data._id}">Username:</label>
-                            <button class="copy-clipboard-button" type="button">
-                                <input type="text" id="username_${data._id}" value="${data.username}" readonly>
-                                <i class="fa fa-copy"></i>
-                                <p></p>
-                            </button>
-                            
-                        </li>
-                        <li style="display: none;">
-                            <label for="password_${data._id}">Password:</label>
-                            <button class="copy-clipboard-button" type="button">
-                                <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
-                                <i class="fa fa-copy"></i>
-                                <p></p>
-                            </button>
-                        </li>
-                        <li style="display: none;">
-                            <label for="website_${data._id}">Website:</label>
-                            <input type="text" id="website_${data._id}" value="${data.website}" readonly>
-                        </li>
-                    </ul>
-                </li>
+                        
+                    </li>
+                    <li>
+                        <label for="password_${data._id}">Password: </label>
+                        <input type="password" id="password_${data._id}" value="This is a mimic password!" readonly>
+                        <button class="copy-clipboard-button" type="button">                            
+                            <i class="fa fa-copy"></i>
+                            <p></p>
+                        </button>
+                    </li>
+                    <li>
+                        <label for="website_${data._id}">Website: </label>
+                        <input type="text" id="website_${data._id}" value="${data.website}" readonly>
+                    </li>
+                </div>
             </div>
         `)
     }
@@ -316,40 +314,31 @@
             
             item.onclick = function () {
                 
-                if (collapsible.length > 1) {
-                    collapsible.forEach((collItem) => {
-                        if(! collItem.parentNode.isSameNode(this.parentNode)) {
-                            const childList = collItem.closest("li").getElementsByTagName("li")
-                            const icon = collItem.parentNode.querySelector("i:not(.fa-trash-o)")
-                            for (let li of childList) {
-                                if (li.style.display == "block") {
-                                    icon.classList.replace("fa-angle-down", "fa-angle-up")
-                                    
-                                    li.style.display = "none"
-                                }
-                            }
+                let parentItem = this.parentNode
+                let collapse = parentItem.parentNode.querySelector(".search-inner-list-item")
+                let arrowIcon = parentItem.querySelector("i:not(.fa-trash-o)")
+                let arrowPositionUp = arrowIcon.classList.contains("fa-angle-up")
+                
+                if (collapsible.length > 2) {
+                    collapsible.forEach((collapsibleItem) => {
+                        let currentParent = collapsibleItem.parentNode
+                        
+                        if(! currentParent.isSameNode(parentItem)) {
+                            let rootParent = currentParent.parentNode
+                            let currentIcon = rootParent.querySelector("i:not(.fa-trash-o)")
+                            let targetCollapser = rootParent.querySelector(".search-inner-list-item")
+                            targetCollapser.classList.remove("show-item")
+                            currentIcon.classList.replace("fa-angle-down", "fa-angle-up")
                         }
                     })
-                }
+                }                        
                 
-                const childList = this.closest("li").getElementsByTagName("li")
-                const icon = this.parentNode.querySelector("i:not(.fa-trash-o)")
-                for (let li of childList) {
-                    var currentState = li.style.display
-
-                    if (currentState == "none") {
-                        icon.classList.replace("fa-angle-up", "fa-angle-down")
-                        li.classList.remove("opacityOut")
-                        li.classList.add("opacityIn")
-                        li.style.display = "block"
-                    }
-                    else {
-                        icon.classList.replace("fa-angle-down", "fa-angle-up")
-                        li.classList.remove("opacityIn")
-                        li.classList.add("opacityOut")
-                        li.style.display = "none"
-                    }
-                }                
+                collapse.classList.toggle('show-item')
+                if(arrowPositionUp) {
+                    arrowIcon.classList.replace("fa-angle-up", "fa-angle-down")
+                } else {
+                    arrowIcon.classList.replace("fa-angle-down", "fa-angle-up")
+                }                                           
             }
         })
     }
@@ -369,10 +358,12 @@
         clipboards.forEach((item) => {
 
             item.onclick = async function () {
-                let input = this.firstElementChild
+                let input = this.parentNode.querySelector("input")
                 let attr = input.getAttribute("id")
                 let joined = attr.split("_")
                 const id = joined[1]
+
+                this.closest(".search-inner-list-item").style.overflow = "visible"
 
                 if (input.getAttribute("type") == "text") {
                     await copyRichText(input.value)
@@ -389,7 +380,8 @@
                 setTimeout(() => {
                     p.innerHTML = ""
                     p.style.display = "none"
-                }, 1000)
+                    this.closest(".search-inner-list-item").style.overflow = "hidden"
+                }, 600)
             }
 
         })
