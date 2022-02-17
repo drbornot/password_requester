@@ -74,7 +74,7 @@ func GetInstance(mailConfig *MailConfig, filename string) *Instance {
 <br/>
 
 <div style="width: 250px">
-    <img src="docs/folder_structure.png" alt="folder structure" />
+    <img src="docs/folder_structure.png" alt="folder structure" width=250/>
 </div>
 
 <br/>
